@@ -12,16 +12,37 @@
 
 %}
 
-white_space       [ \t]*
+white_space       [ \t\f\b\r]*
 digits            [0-9]
-string            \"([^"\n])*\"
-bad_string        \"([^"\n])*
+
+%Start            STR
 
 %option warn nodefault batch noyywrap c++
 %option yylineno
 %option yyclass="CoolLexer"
 
 %%
+
+<INITIAL>(\")           {   yymore(); BEGIN(STR);   }
+<STR>\n                 {   Error("Wrong newline in string"); 
+                            BEGIN(INITIAL); 
+                            lineno++; 
+                            return TOKEN_BAD_STRING;
+                        }
+<STR><<EOF>>            {   Error("EOF in string"); 
+                            BEGIN(INITIAL); 
+                            return TOKEN_BAD_STRING; 
+                        }
+<STR>\0                 {   BEGIN(INITIAL); 
+                            Error("Can't use \\0 in strings");  
+                            yymore(); 
+                            return TOKEN_BAD_STRING; 
+                        }
+
+<STR>[^\\\"\n]*         {yymore();}
+<STR>\\[^\n]            {yymore();}
+<STR>\\\n               {lineno++; yymore();}
+<STR>\"                 {BEGIN(INITIAL); return TOKEN_STRING;}
 
 (?i:class)              return TOKEN_KEYWORD_CLASS;
 (?i:else)               return TOKEN_KEYWORD_ELSE;
@@ -43,7 +64,6 @@ bad_string        \"([^"\n])*
 t(?i:rue)               return TOKEN_KEYWORD_TRUE;
 f(?i:alse)              return TOKEN_KEYWORD_FALSE;
 
-"."                     return TOKEN_DOT;
 "@"                     return TOKEN_AT;
 "~"                     return TOKEN_TILDE;
 "*"                     return TOKEN_MUL;
@@ -54,12 +74,22 @@ f(?i:alse)              return TOKEN_KEYWORD_FALSE;
 "<"                     return TOKEN_LESS;
 "="                     return TOKEN_EQUAL;
 "<-"                    return TOKEN_ASSIGNMENT;
+"."                     return TOKEN_DOT;
+","                     return TOKEN_COMMA;
+";"                     return TOKEN_SEMICOLON;
+":"                     return TOKEN_COLON;
+"("                     return TOKEN_OPEN_REGULAR;
+")"                     return TOKEN_CLOSE_REGULAR;
+"["                     return TOKEN_OPEN_SQUARE;
+"]"                     return TOKEN_CLOSE_SQUARE;
+"{"                     return TOKEN_OPEN_BLOCK;
+"}"                     return TOKEN_CLOSE_BLOCK;
 
-{digits}                return TOKEN_INT_DIGITS;
-[A-Z][a-z]*             return TOKEN_TYPE_IDENTIFER;
-[a-z][A-Z0-9_]*         return TOKEN_OBJECT_IDENTIFER;
-{string}                return TOKEN_STRINGS;
-{bad_string}            Error("unterminated string");
+{digits}+               return TOKEN_INT_DIGITS;
+
+[A-Z][A_Za-z0-9_]*      return TOKEN_TYPE_IDENTIFER;
+[a-z][A-Za-z0-9_]*      return TOKEN_OBJECT_IDENTIFER;
+_[A-Za-z0-9_]*          return TOKEN_IDENTIFIER_OTHER;
 
 {white_space}        { /* skip spaces */ }
 \n                   lineno++;
