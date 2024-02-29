@@ -16,6 +16,7 @@ white_space       [ \t\f\b\r]*
 digits            [0-9]
 
 %Start            STR
+%x                COMMENT
 
 %option warn nodefault batch noyywrap c++
 %option yylineno
@@ -42,7 +43,21 @@ digits            [0-9]
 <STR>[^\\\"\n]*         {yymore();}
 <STR>\\[^\n]            {yymore();}
 <STR>\\\n               {lineno++; yymore();}
-<STR>\"                 {BEGIN(INITIAL); return TOKEN_STRING;}
+<STR>\"                 {Escape(); BEGIN(INITIAL); return TOKEN_STRING;}
+
+--.*                      { }
+"*)"                      { Error("Unmatched comment ending"); BEGIN(INITIAL); return ERROR; }
+"(*"                      { BEGIN(COMMENT); comment_level = 0; }
+<COMMENT>"(*"             { comment_level++; }
+<COMMENT><<EOF>>          { Error("EOF in comment"); BEGIN(INITIAL); return ERROR; }
+<COMMENT>\n               { lineno++; }
+<COMMENT>.                { }
+<COMMENT>"*)"             {
+                            if (comment_level == 0) {
+                                BEGIN(INITIAL);
+                            }
+                            comment_level--;
+                          }
 
 (?i:class)              return TOKEN_KEYWORD_CLASS;
 (?i:else)               return TOKEN_KEYWORD_ELSE;
@@ -101,4 +116,26 @@ void CoolLexer::Error(const char* msg) const
 {
     std::cerr << "Lexer error (line " << lineno + 1 << "): " << msg << ": lexeme '" << YYText() << "'\n";
     std::exit(YY_EXIT_FAILURE);
+}
+
+void CoolLexer::Escape(){
+    const char *input = yytext;
+    char *output = yytext;
+    input++; // Skip opening '\"'
+    while (*(input + 1) /* Skip closing '\"' */ ) {
+        if (*input == '\\') {
+            input++; // Skip '\\'
+            switch (*input) {
+                case 'n': *output++ = '\n'; break;
+                case 't': *output++ = '\t'; break;
+                case 'f': *output++ = '\f'; break;
+                case 'b': *output++ = '\b'; break;
+                default: *output++ = *input;
+            }
+        } else {
+            *output++ = *input;
+        }
+        input++;
+    }
+    *output = '\0'; // Null-terminate the output string
 }
