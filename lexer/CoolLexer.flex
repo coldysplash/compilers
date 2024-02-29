@@ -16,7 +16,8 @@ white_space       [ \t\f\b\r]*
 digits            [0-9]
 
 %Start            STR
-%x                COMMENT
+%Start            COMMENT_INLINE
+%Start            COMMENT
 
 %option warn nodefault batch noyywrap c++
 %option yylineno
@@ -45,19 +46,24 @@ digits            [0-9]
 <STR>\\\n               {lineno++; yymore();}
 <STR>\"                 {Escape(); BEGIN(INITIAL); return TOKEN_STRING;}
 
---.*                      { }
-"*)"                      { Error("Unmatched comment ending"); BEGIN(INITIAL); return ERROR; }
-"(*"                      { BEGIN(COMMENT); comment_level = 0; }
-<COMMENT>"(*"             { comment_level++; }
+<INITIAL>"--"                  {BEGIN(COMMENT_INLINE);}
+<COMMENT_INLINE>[^\n]*         {}
+<COMMENT_INLINE><<EOF>>        {BEGIN(INITIAL);}
+<COMMENT_INLINE>\n             {lineno++; BEGIN(INITIAL);}
+
+<INITIAL,COMMENT>"(*"          {comment_level++; BEGIN(COMMENT);}
+
 <COMMENT><<EOF>>          { Error("EOF in comment"); BEGIN(INITIAL); return ERROR; }
 <COMMENT>\n               { lineno++; }
-<COMMENT>.                { }
+<COMMENT>[^\n*(]*         { }
+<COMMENT>[*()]            { }  
 <COMMENT>"*)"             {
-                            if (comment_level == 0) {
-                                BEGIN(INITIAL);
-                            }
                             comment_level--;
+                            if (comment_level == 0) {
+                                BEGIN(INITIAL);            
+                            }
                           }
+"*)"                      { Error("Unmatched comment ending"); BEGIN(INITIAL); return ERROR; }
 
 (?i:class)              return TOKEN_KEYWORD_CLASS;
 (?i:else)               return TOKEN_KEYWORD_ELSE;
