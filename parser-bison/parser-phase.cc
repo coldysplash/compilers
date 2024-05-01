@@ -44,9 +44,14 @@ int main(int argc, char **argv)
 
         ast_root->dump_with_types(std::cerr, 0);
 
-        idtable.print();
-        inttable.print();
-        stringtable.print();
+        // idtable.print();
+        // inttable.print();
+        // stringtable.print();
+
+        for (int i = parse_results->first(); parse_results->more(i); i = parse_results->next(i))
+        {
+            std::cout << parse_results->nth(i)->get_name() << '\n';
+        }
 
         std::fclose(token_file);
     }
