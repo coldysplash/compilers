@@ -35,6 +35,8 @@ public:
    tree_node *copy() { return copy_Class_(); }
    virtual Class_ copy_Class_() = 0;
    virtual Symbol get_name() = 0;
+   virtual Symbol get_parent() = 0;
+   virtual Features get_features() = 0;
 
 #ifdef Class__EXTRAS
    Class__EXTRAS
@@ -49,6 +51,8 @@ class Feature_class : public tree_node
 public:
    tree_node *copy() { return copy_Feature(); }
    virtual Feature copy_Feature() = 0;
+   virtual Symbol get_name() = 0;
+   virtual Symbol get_type() = 0;
 
 #ifdef Feature_EXTRAS
    Feature_EXTRAS
@@ -161,6 +165,8 @@ public:
    Class_ copy_Class_();
    void dump(std::ostream &stream, int n);
    Symbol get_name() override;
+   Symbol get_parent() override;
+   Features get_features() override;
 
 #ifdef Class__SHARED_EXTRAS
    Class__SHARED_EXTRAS
@@ -189,6 +195,8 @@ public:
    }
    Feature copy_Feature();
    void dump(std::ostream &stream, int n);
+   Symbol get_name() override;
+   Symbol get_type() override;
 
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
@@ -215,6 +223,8 @@ public:
    }
    Feature copy_Feature();
    void dump(std::ostream &stream, int n);
+   Symbol get_name() override;
+   Symbol get_type() override;
 
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
