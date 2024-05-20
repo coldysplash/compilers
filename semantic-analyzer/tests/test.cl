@@ -3,7 +3,7 @@ class A {};
 class B inherits C {};
 
 class Main {
-  main() : Int {
+  main(b : Int, b : Int) : Int {
     42
   };
   foo() : Int {

@@ -83,6 +83,9 @@ public:
   tree_node *copy() { return copy_Expression(); }
   virtual Expression copy_Expression() = 0;
   virtual std::string get_expr_type() = 0;
+  virtual Expressions get_expressions() = 0;
+  virtual std::string get_name() = 0;
+  virtual Symbol get_type_decl() = 0;
 
 #ifdef Expression_EXTRAS
   Expression_EXTRAS
@@ -297,6 +300,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "assign_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -325,6 +331,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "static_dispatch_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -351,6 +360,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "dispatch_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -377,6 +389,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "cond_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -401,6 +416,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "loop_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -425,6 +443,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "typcase_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -445,6 +466,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "block_class"; }
+  Expressions get_expressions() override { return body; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -473,6 +497,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "let_class"; }
+  std::string get_name() override { return identifier->get_string(); }
+  Expressions get_expressions() override { return nullptr; }
+  Symbol get_type_decl() override { return type_decl; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -497,6 +524,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "plus_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -521,6 +551,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "sub_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -545,6 +578,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "mul_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -569,6 +605,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "divide_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -589,6 +628,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "neg_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -613,6 +655,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "lt_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -637,6 +682,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "eq_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -661,6 +709,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "leq_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -681,6 +732,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "comp_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -701,6 +755,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "int_const_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -721,6 +778,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "bool_const_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -741,6 +801,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "string_const_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -761,6 +824,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "new__class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -781,6 +847,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "isvoid_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -799,6 +868,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "no_expr_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -819,6 +891,9 @@ public:
   void dump(std::ostream &stream, int n);
 
   std::string get_expr_type() override { return "object_class"; }
+  Expressions get_expressions() override { return nullptr; }
+  std::string get_name() override { return ""; }
+  Symbol get_type_decl() override { return nullptr; }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS

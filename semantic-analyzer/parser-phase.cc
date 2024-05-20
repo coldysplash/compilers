@@ -113,12 +113,14 @@ int main(int argc, char **argv) {
     // inttable.print();
     // stringtable.print();
 
+    // Добавление в AST класса (узла) для встроенных типов
     Symbol filename = stringtable.add_string("<builtin-classes>");
     Symbol Object = idtable.add_string("Object");
     Symbol Bool = idtable.add_string("Bool");
     Symbol Int = idtable.add_string("Int");
     Symbol String = idtable.add_string("String");
     Symbol SELF_TYPE = idtable.add_string("SELF_TYPE");
+    Symbol Main = idtable.add_string("Main");
 
     std::unordered_set<Symbol> not_inherited{Bool, Int, String, SELF_TYPE};
     std::unordered_set<Symbol> classes_names{
@@ -134,7 +136,7 @@ int main(int argc, char **argv) {
       auto result = classes_names.insert(class_name);
       if (!result.second) {
         std::cerr << "Semantic Error! class '" << class_name->get_string()
-                  << "' redeclared." << std::endl;
+                  << "' redeclared.\n";
       }
       classes.push_back(class_name->get_string());
 
@@ -149,7 +151,7 @@ int main(int argc, char **argv) {
       classes_hierarchy[class_name->get_string()] = parent_name->get_string();
       if (std::string(parent_name->get_string()) != "Object") {
         if (!classes_hierarchy.contains(parent_name->get_string())) {
-          std::cerr << "Semantic Error! Unknow parent of class '"
+          std::cerr << "Semantic Error! Unknown parent of class '"
                     << class_name->get_string() << "' - '"
                     << parent_name->get_string() << "'\n";
         }
@@ -164,26 +166,22 @@ int main(int argc, char **argv) {
         std::string feature_name = feature->get_name()->get_string();
 
         if (feature_name == "self") {
-          std::cerr << "Semantic Error! can't use 'self' as feature name"
-                    << std::endl;
+          std::cerr << "Semantic Error! can't use 'self' as feature name\n";
         }
 
         auto res = features_names.insert(feature_name);
         if (!res.second) {
           std::cerr << "Semantic Error! feature '" << feature_name << "' in '"
-                    << class_name << "' already exists!" << std::endl;
+                    << class_name << "' already exists!" << '\n';
         }
 
         Symbol type = feature->get_type();
         if (classes_names.find(type) == classes_names.end()) {
-          std::cerr << "Semantic Error! unknown type '" << type << "' in "
-                    << feature_name << std::endl;
+          std::cerr << "Semantic Error! Unknown type '" << type << "' in "
+                    << feature_name << '\n';
         }
 
         if (feature->get_feature_type() == "method_class") {
-          // Methods formals
-          Formals formals = feature->get_formals();
-
           // Check method overrides - must have same signature
           if (std::string(parent_name->get_string()) != "Object") {
             class__class *parent =
@@ -228,20 +226,106 @@ int main(int argc, char **argv) {
                 }
               }
             } else {
-              std::cerr << "Semantic Error! Unknow parent of class '"
+              std::cerr << "Semantic Error! Unknown parent of class '"
                         << class_name->get_string() << "' - '"
                         << parent_name->get_string() << "'\n";
             }
           }
+          Formals formals = feature->get_formals();
+          // Local formals names
+          std::unordered_set<std::string> formals_names;
 
+          // Loop through formals
+          for (int k = formals->first(); formals->more(k);
+               k = formals->next(k)) {
+
+            std::string formal_name = formals->nth(k)->get_name()->get_string();
+
+            // 'self' name check
+            if (formal_name == "self") {
+              std::cerr << "Semantic Error! can't use 'self' as formal name\n";
+            }
+
+            // Unique name check
+            auto f_result = formals_names.insert(formal_name);
+            if (!f_result.second) {
+              std::cerr << "Semantic Error! formal '" << formal_name
+                        << "' in method '" << feature_name
+                        << "' already exists!\n";
+            }
+
+            type = formals->nth(k)->get_type();
+
+            // Check formal type
+            if (classes_names.find(type) == classes_names.end()) {
+              std::cerr << "Semantic Error! Unknown type '"
+                        << type->get_string() << "' in " << formal_name << '\n';
+            }
+
+            // Get method expression
+            Expression expr = features->nth(j)->get_expr();
+
+            // block_class check
+            if (expr->get_expr_type() == "block_class") {
+
+              // Get expressions from block
+              Expressions exprs = expr->get_expressions();
+
+              // Block expressions check
+              for (int l = exprs->first(); exprs->more(l); l = exprs->next(l)) {
+                Expression current = exprs->nth(l);
+
+                // let
+                if (current->get_expr_type() == "let_class") {
+
+                  // Get let-expr variable name
+                  formal_name = current->get_name();
+
+                  // 'self' name check
+                  if (formal_name == "self") {
+                    std::cerr
+                        << "Semantic Error! can't use 'self' as formal name\n";
+                  }
+
+                  // Check unique of nested formal
+                  f_result = formals_names.insert(formal_name);
+                  if (!f_result.second) {
+                    std::cerr << "Semantic Error! formal '" << formal_name
+                              << "' in method '" << feature_name << "' from '"
+                              << class_name->get_string()
+                              << "' already exists!\n";
+                  }
+
+                  // Let-expr formal type check
+                  type = current->get_type_decl();
+                  if (classes_names.find(type) == classes_names.end()) {
+                    std::cerr << "Semantic Error! Unknown type '"
+                              << type->get_string() << "' in " << formal_name
+                              << '\n';
+                  }
+                }
+              }
+            }
+          }
         } else { // attributes_class
           attr_class *attr = dynamic_cast<attr_class *>(feature);
           semantic::check_builtin_type(
               attr->get_type()->get_string(), attr->get_expr());
         }
       }
+      // Check existence of method main in class Main
+      if (std::string(class_name->get_string()) == "Main" &&
+          features_names.find("main") == features_names.end()) {
+        std::cerr << "No method 'main' in class 'Main'\n";
+      }
+    }
+
+    // Check existence of class Main
+    if (classes_names.find(Main) == classes_names.end()) {
+      std::cerr << "class Main doesn't exist\n";
     }
 
     std::fclose(token_file);
   }
+  std::cout << std::endl;
 }
