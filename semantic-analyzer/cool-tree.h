@@ -52,6 +52,7 @@ public:
   virtual Symbol get_type() const = 0;
   virtual std::string get_feature_type() const = 0;
   virtual Expression get_expr() const = 0;
+  virtual Formals get_formals() const = 0;
 
 #ifdef Feature_EXTRAS
   Feature_EXTRAS
@@ -65,6 +66,9 @@ class Formal_class : public tree_node {
 public:
   tree_node *copy() { return copy_Formal(); }
   virtual Formal copy_Formal() = 0;
+
+  virtual Symbol get_name() const = 0;
+  virtual Symbol get_type() const = 0;
 
 #ifdef Formal_EXTRAS
   Formal_EXTRAS
@@ -184,10 +188,12 @@ public:
   }
   Feature copy_Feature();
   void dump(std::ostream &stream, int n);
+
   Symbol get_name() const override { return name; }
   Symbol get_type() const override { return return_type; }
   std::string get_feature_type() const override { return "method_class"; }
   Expression get_expr() const override { return expr; }
+  Formals get_formals() const override { return formals; }
 
 #ifdef Feature_SHARED_EXTRAS
   Feature_SHARED_EXTRAS
@@ -212,10 +218,12 @@ public:
   }
   Feature copy_Feature();
   void dump(std::ostream &stream, int n);
+
   Symbol get_name() const override { return name; }
   Symbol get_type() const override { return type_decl; }
   std::string get_feature_type() const override { return "attr_class"; }
   Expression get_expr() const override { return init; }
+  Formals get_formals() const override { return nullptr; }
 
 #ifdef Feature_SHARED_EXTRAS
   Feature_SHARED_EXTRAS
@@ -238,6 +246,9 @@ public:
   }
   Formal copy_Formal();
   void dump(std::ostream &stream, int n);
+
+  Symbol get_name() const override { return name; }
+  Symbol get_type() const override { return type_decl; }
 
 #ifdef Formal_SHARED_EXTRAS
   Formal_SHARED_EXTRAS

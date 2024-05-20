@@ -1,5 +1,3 @@
--- wrong
-
 class A inherits B {
 
 };
@@ -12,14 +10,12 @@ class C inherits D { -- unknown class D
 
 };
 
--- right
-
-class E {
-
+class P {
+    f(): Int { 1 };
+};
+class W inherits P {
+    f(): Int { "1" };
 };
 
-class F inherits E {
-
-};
 
 -- no Main class

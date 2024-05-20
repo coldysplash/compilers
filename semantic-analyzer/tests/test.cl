@@ -1,16 +1,12 @@
 class A {};
 
-class B inherits A {};
-
-class D inherits B {};
-
-class F inherits C {};
+class B inherits C {};
 
 class Main {
   main() : Int {
     42
   };
-  foo() : Object {
+  foo() : Int {
     42
   };
 };

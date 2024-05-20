@@ -40,6 +40,52 @@ void check_builtin_type(std::string type, Expression expr) {
   }
 }
 
+class__class *find_class(std::string name, Classes classes) {
+  for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
+    class__class *cur_class = dynamic_cast<class__class *>(classes->nth(i));
+    if (name == cur_class->get_name()->get_string()) {
+      return cur_class;
+    }
+  }
+  return nullptr;
+}
+
+bool check_signatures(method_class *m1, method_class *m2) {
+  if (m1->get_type() != m2->get_type()) {
+    return false;
+  }
+
+  Formals m1_formals = m1->get_formals();
+  Formals m2_formals = m2->get_formals();
+  // Check formals count
+  if (m1_formals->len() != m2_formals->len()) {
+    return false;
+  }
+
+  // Loop through formals
+  for (int i = m1_formals->first(); m1_formals->more(i);
+       i = m1_formals->next(i)) {
+    formal_class *m1_formal = dynamic_cast<formal_class *>(m1_formals->nth(i));
+    formal_class *m2_formal = dynamic_cast<formal_class *>(m2_formals->nth(i));
+
+    std::string name1 = m1_formal->get_name()->get_string();
+    std::string name2 = m2_formal->get_name()->get_string();
+    // Check formal names
+    if (name1 != name2) {
+      return false;
+    }
+
+    // Get formal types
+    std::string type1 = m1_formal->get_type()->get_string();
+    std::string type2 = m1_formal->get_type()->get_string();
+    // Check formal types
+    if (type1 != type2) {
+      return false;
+    }
+  }
+  return true;
+}
+
 } // namespace semantic
 
 int main(int argc, char **argv) {
@@ -77,8 +123,7 @@ int main(int argc, char **argv) {
     std::unordered_set<Symbol> not_inherited{Bool, Int, String, SELF_TYPE};
     std::unordered_set<Symbol> classes_names{
         Object, Bool, Int, String, SELF_TYPE};
-    std::unordered_map<std::string, std::string> classes_hierarchy{
-        {"Object", "Object"}};
+    std::unordered_map<std::string, std::string> classes_hierarchy;
 
     std::vector<std::string> classes;
     std::vector<std::string> parents;
@@ -102,10 +147,12 @@ int main(int argc, char **argv) {
       }
       // формируем таблицу class <-> parent
       classes_hierarchy[class_name->get_string()] = parent_name->get_string();
-      if (!classes_hierarchy.contains(parent_name->get_string())) {
-        std::cerr << "Semantic Error! Unknow parent of class '"
-                  << class_name->get_string() << "' - '"
-                  << parent_name->get_string() << "'\n";
+      if (std::string(parent_name->get_string()) != "Object") {
+        if (!classes_hierarchy.contains(parent_name->get_string())) {
+          std::cerr << "Semantic Error! Unknow parent of class '"
+                    << class_name->get_string() << "' - '"
+                    << parent_name->get_string() << "'\n";
+        }
       }
 
       // проверяем методы класса
@@ -134,6 +181,59 @@ int main(int argc, char **argv) {
         }
 
         if (feature->get_feature_type() == "method_class") {
+          // Methods formals
+          Formals formals = feature->get_formals();
+
+          // Check method overrides - must have same signature
+          if (std::string(parent_name->get_string()) != "Object") {
+            class__class *parent =
+                semantic::find_class(parent_name->get_string(), parse_results);
+
+            if (parent) {
+              Features parent_features = parent->get_features();
+
+              // Loop through parent features
+              for (int a = parent_features->first(); parent_features->more(a);
+                   a = parent_features->next(a)) {
+                Feature parent_feature = parent_features->nth(a);
+
+                // Get feature name
+                std::string parent_feature_name =
+                    parent_feature->get_name()->get_string();
+
+                // If there is parent feature with same name
+                if (parent_feature_name == feature_name) {
+
+                  // Check if feature is same type
+                  if (parent_feature->get_feature_type() !=
+                      feature->get_feature_type()) {
+                    std::cerr << "Semantic Error! wrong override of feature '"
+                              << feature_name << "' from class '"
+                              << parent_name->get_string() << "' in class '"
+                              << class_name << "'\n";
+                  }
+
+                  // Check method signatures
+                  method_class *cur_method =
+                      dynamic_cast<method_class *>(feature);
+                  method_class *parent_method =
+                      dynamic_cast<method_class *>(parent_feature);
+                  if (!semantic::check_signatures(cur_method, parent_method)) {
+                    std::cerr
+                        << "Semantic Error! '" << feature_name
+                        << "' method from class '" << parent_name->get_string()
+                        << "' doesn't match override version of it in class '"
+                        << class_name << "'";
+                  }
+                }
+              }
+            } else {
+              std::cerr << "Semantic Error! Unknow parent of class '"
+                        << class_name->get_string() << "' - '"
+                        << parent_name->get_string() << "'\n";
+            }
+          }
+
         } else { // attributes_class
           attr_class *attr = dynamic_cast<attr_class *>(feature);
           semantic::check_builtin_type(
