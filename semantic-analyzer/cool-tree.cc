@@ -30,34 +30,9 @@ void class__class::dump(std::ostream &stream, int n)
    dump_Symbol(stream, n + 2, filename);
 }
 
-Symbol class__class::get_name()
-{
-   return name;
-}
-
-Symbol class__class::get_parent()
-{
-   return parent;
-}
-
-Features class__class::get_features()
-{
-   return features;
-}
-
 Feature method_class::copy_Feature()
 {
    return new method_class(copy_Symbol(name), formals->copy_list(), copy_Symbol(return_type), expr->copy_Expression());
-}
-
-Symbol method_class::get_name()
-{
-   return name;
-}
-
-Symbol method_class::get_type()
-{
-   return return_type;
 }
 
 void method_class::dump(std::ostream &stream, int n)
@@ -67,16 +42,6 @@ void method_class::dump(std::ostream &stream, int n)
    formals->dump(stream, n + 2);
    dump_Symbol(stream, n + 2, return_type);
    expr->dump(stream, n + 2);
-}
-
-Symbol attr_class::get_name()
-{
-   return name;
-}
-
-Symbol attr_class::get_type()
-{
-   return type_decl;
 }
 
 Feature attr_class::copy_Feature()

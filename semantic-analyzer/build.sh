@@ -1,6 +1,6 @@
 #!/bin/sh
 
-CXXFLAGS="-Wall -I ./src/ -Wno-unused -Wno-deprecated  -Wno-write-strings -Wno-free-nonheap-object"
+CXXFLAGS="-Wall -std=c++20 -I ./src/ -Wno-unused -Wno-deprecated  -Wno-write-strings -Wno-free-nonheap-object"
 
 bison -d -v -y -b cool --debug -p cool_yy -o cool-bison-parser.cc cool.bison
 flex -d -o cool-flex-lexer.cc ./cool.flex
