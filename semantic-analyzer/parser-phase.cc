@@ -86,6 +86,21 @@ bool check_signatures(method_class *m1, method_class *m2) {
   return true;
 }
 
+bool detect_cycle(
+    std::unordered_map<std::string, std::string> classes_hierarchy) {
+  for (const auto &[class_name, parent_name] : classes_hierarchy) {
+    if (parent_name != "Object") {
+      class__class *parent = find_class(parent_name, parse_results);
+      if (parent) {
+        if (std::string(parent->get_parent()->get_string()) == class_name) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 } // namespace semantic
 
 int main(int argc, char **argv) {
@@ -316,13 +331,23 @@ int main(int argc, char **argv) {
       // Check existence of method main in class Main
       if (std::string(class_name->get_string()) == "Main" &&
           features_names.find("main") == features_names.end()) {
-        std::cerr << "No method 'main' in class 'Main'\n";
+        std::cerr << "Semantic Error! No method 'main' in class 'Main'\n";
+      }
+    }
+
+    // Detect loop in classes inheritance hierarchy
+    if (semantic::detect_cycle(classes_hierarchy)) {
+      std::cerr
+          << "Semantic Error! loop detected in classes inheritance hierarchy\n";
+      std::cerr << "\\ program classes' hierarchy (child : parent)\n";
+      for (auto p : classes_hierarchy) {
+        std::cerr << '\t' << p.first << " : " << p.second << "\n";
       }
     }
 
     // Check existence of class Main
     if (classes_names.find(Main) == classes_names.end()) {
-      std::cerr << "class Main doesn't exist\n";
+      std::cerr << "Semantic Error! class Main doesn't exist\n";
     }
 
     std::fclose(token_file);
