@@ -217,14 +217,15 @@ int main(int argc, char **argv) {
                 // If there is parent feature with same name
                 if (parent_feature_name == feature_name) {
 
-                  // Check if feature is same type
-                  if (parent_feature->get_feature_type() !=
-                      feature->get_feature_type()) {
-                    std::cerr << "Semantic Error! wrong override of feature '"
-                              << feature_name << "' from class '"
-                              << parent_name->get_string() << "' in class '"
-                              << class_name << "'\n";
-                  }
+                  // // Check if feature is same type
+                  // if (parent_feature->get_feature_type() !=
+                  //     feature->get_feature_type()) {
+                  //   std::cerr << "Semantic Error! wrong override of feature
+                  //   '"
+                  //             << feature_name << "' from class '"
+                  //             << parent_name->get_string() << "' in class '"
+                  //             << class_name << "'\n";
+                  // }
 
                   // Check method signatures
                   method_class *cur_method =

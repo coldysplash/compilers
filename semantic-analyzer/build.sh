@@ -11,4 +11,4 @@ g++ $CXXFLAGS -c stringtab.cc
 g++ $CXXFLAGS -c cool-tree.cc
 g++ $CXXFLAGS -c cool-flex-lexer.cc
 g++ $CXXFLAGS -c cool-bison-parser.cc
-g++ $LDFLAGS $CXXFLAGS parser-phase.o utilities.o stringtab.o cool-tree.o cool-flex-lexer.o cool-bison-parser.o -o parser
+g++ $LDFLAGS $CXXFLAGS parser-phase.o utilities.o stringtab.o cool-tree.o cool-flex-lexer.o cool-bison-parser.o -o semantic
